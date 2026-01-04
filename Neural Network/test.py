@@ -3,25 +3,22 @@ import pandas as pd
 import tensorflow as tf
 import os
 from model.model import Model 
-# =========================================================
-# CONFIGURATION
-# =========================================================
+
 CHECKPOINT_FILE = "global_model.npz"
 TEST_FILE = "x_test_processed"
-# =========================================================
 
 def load_test_data(file_path):
     print(f"Loading {file_path}...")
     try:
-        # 1. Try reading with Python engine (smarter detection)
+        # Try reading with Python engine 
         df = pd.read_csv(file_path, sep=None, engine='python')
         
-        # 2. If that failed (1 column detected), try semicolon explicitly
+        # If that failed try ;
         if df.shape[1] < 2:
             print("  -> Auto-detect failed (found 1 column). Retrying with sep=';'...")
             df = pd.read_csv(file_path, sep=';', engine='python')
 
-        # 3. If STILL 1 column, try comma explicitly
+        # If Failed agin try ,
         if df.shape[1] < 2:
             print("  -> Retrying with sep=','...")
             df = pd.read_csv(file_path, sep=',', engine='python')
@@ -59,16 +56,16 @@ def main():
         print(f"[!] No model file found at {CHECKPOINT_FILE}")
         return
 
-    # 1. Load Data
+    # Load Data
     X_test, y_test = load_test_data(TEST_FILE)
     if X_test is None: return
 
-    # 2. Initialize Model
-    # Use input_size (not input_shape)
+    # Initialize Model (Use input_size)
+    
     model_container = Model(input_size=41) 
     model = model_container.model
     
-    # 3. Load Weights
+    # Load Weights
     print(f"Loading weights from {CHECKPOINT_FILE}...")
     try:
         data = np.load(CHECKPOINT_FILE)
@@ -79,16 +76,16 @@ def main():
         print(f"[!] Error loading weights: {e}")
         return
 
-    # 4. PREDICTION CHECK
+    # PREDICTION CHECK
     print("\n" + "="*30)
     print("DEBUG: Checking Variance in Predictions...")
     
-    # A) Predict with Scaler (Standard Behavior)
+    # Predict with Scaler (Standard Behavior)
     model_container._ensure_scaler(X_test) # Fits scaler on X_test (might be bad if dist is different)
     X_scaled = model_container.scaler.transform(X_test)
     preds_scaled = model.predict(X_scaled, verbose=0) * 100.0
     
-    # B) Predict RAW (In case model expects raw inputs or specific range)
+    # Predict RAW (In case model expects raw inputs or specific range)
     preds_raw = model.predict(X_test, verbose=0) * 100.0
 
     print(f"Stats with Scaler -> Mean: {np.mean(preds_scaled):.2f}, Std: {np.std(preds_scaled):.2f}")
@@ -108,7 +105,7 @@ def main():
 
     print("="*30 + "\n")
     
-    # 5. Print & Save
+    # Print & Save
     for i in range(5):
         print(f" Sample {i}: Predicted Sleep Quality = {final_preds[i][0]:.2f}")
 
