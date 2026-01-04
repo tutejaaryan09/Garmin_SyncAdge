@@ -2,18 +2,15 @@ import pandas as pd
 import xgboost as xgb
 import numpy as np
 
-print("🔍 Loading files...")
-
 # Load test data
 df_raw = pd.read_csv("x_test.csv", sep=';')
 ids = df_raw['id'].values
-print(f"✅ Loaded {len(ids)} IDs")
+print(f"Loaded {len(ids)} IDs")
 
 df_proc = pd.read_csv("x_test_processed.csv", sep=';')
 X_test = df_proc.iloc[:, 1:].values.astype(np.float32)  # (189, 40)
-print(f"✅ Features shape: (189, 40)")
+print(f" Features shape: (189, 40)")
 
-# 🔥 EXACT 41 feature names FROM MODEL [file:26]
 feature_names = [
     'day', 'hr_maxHeartRate', 'hr_minHeartRate', 'hr_restingHeartRate',
     'hr_lastSevenDaysAvgRestingHeartRate', 'resp_lowestRespirationValue',
@@ -32,31 +29,27 @@ feature_names = [
     'stress_time_series_std', 'stress_time_series_min', 'stress_time_series_max'
 ]
 
-# Add 'day' column (feature 0)
 day_column = np.zeros((X_test.shape[0], 1), dtype=np.float32)
 X_test_full = np.hstack([day_column, X_test])  # (189, 41)
-print(f"✅ Full features with 'day': (189, 41)")
+print(f" Full features with 'day': (189, 41)")
 
-# 🔥 PASS FEATURE NAMES TO DMATRIX - THIS FIXES IT!
 dtest = xgb.DMatrix(X_test_full, feature_names=feature_names)
-print("✅ DMatrix with EXACT feature names created!")
+print(" DMatrix with EXACT feature names created!")
 
 # Load model
 model = xgb.Booster(model_file="final_model.json")
-print("✅ Model LOADED from JSON!")
+print("Model LOADED from JSON!")
 
 # Predict
 preds = model.predict(dtest)
-print(f"✅ Predictions: {preds.mean():.1f}±{preds.std():.1f} [{preds.min():.1f}-{preds.max():.1f}]")
+print(f"Predictions: {preds.mean():.1f}±{preds.std():.1f} [{preds.min():.1f}-{preds.max():.1f}]")
 
 # Scale to 0-100 if needed
 if preds.max() <= 1.0:
     preds *= 100
-    print("✅ Scaled 0-1 → 0-100")
 
 # Save submission
 submission = pd.DataFrame({'id': ids, 'label': preds})
 submission.to_csv("submission.csv", index=False)
-print("🎉 submission.csv SAVED!")
 print(submission.head())
 print(f"Final stats: mean={preds.mean():.2f}, std={preds.std():.2f}")

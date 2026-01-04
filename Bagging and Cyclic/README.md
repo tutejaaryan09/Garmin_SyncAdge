@@ -10,6 +10,13 @@ pip install -e .
 ```
 
 ## Run
+Using Flower Simulation:
+
+```bash
+flwr run
+
+```
+OR
 
 In the `dtbagging` directory:
 
