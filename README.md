@@ -1,4 +1,6 @@
-## Garmin_SyncAdge
-# 1. Data Collection [27 October- 27 November]
-# 2. Data Analysis [Sleeping Pattern]
-# 3. Explore various insights and correlations within them.
+# Garmin_SyncAdge
+## 1. Data Collection 
+## 2. Data Preprocessing and Analysis
+## 3. Federated Learning using Neural Network and XGBoost Bagging and Cyclic
+## 4. Testing using Kaggle got MAE: 12.43(Baaging), 13.04(Cyclic) and 15.04(NN) on public data.
+## 5. Report and Presentation
